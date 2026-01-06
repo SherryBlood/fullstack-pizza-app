@@ -1,0 +1,32 @@
+<?php
+session_start();
+$conn = new mysqli("localhost", "root", "1234", "pizza_db");
+$conn->set_charset("utf8");
+
+if ($conn->connect_error) {
+    http_response_code(500);
+    echo "Connection Error";
+    exit;
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['ingredient_id'])) {
+    $ingredient_id = (int)$_POST['ingredient_id'];
+
+    $stmt = $conn->prepare("DELETE FROM ingredients WHERE ingredient_id = ?");
+    $stmt->bind_param("i", $ingredient_id);
+
+    if ($stmt->execute()) {
+        echo "success";
+    } else {
+        http_response_code(500);
+        echo "Error deleting: " . $stmt->error;
+    }
+
+    $stmt->close();
+} else {
+    http_response_code(400);
+    echo "Bad request";
+}
+
+$conn->close();
+?>
